@@ -444,8 +444,12 @@ function _init()
   print_ol(s,156,y+menu.start+menu.gap*2,0,8)
   s="3. release to attack"
   print_ol(s,156,y+menu.start+menu.gap*3,0,8)
-  s=btns[0].s.." back"
-  print_ol(s,128+64-(#s+1)/2*4,y+menu.start+menu.gap*4,0,8)
+  
+  color(0)
+  rectfill(128+30,y+menu.start-1+menu.gap*4,128+97,y+15+menu.gap*4)
+  print_ol(btns[0].s,128+30,y+menu.start+menu.gap*4,0,8)
+  s="back"
+  print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*4,0,8)
  end
  menu.draw[1]=function(y)
   
@@ -477,8 +481,11 @@ function _init()
   print_ol(s,128+64-#s*4,y+menu.start+menu.gap*1,0,8)
   s="hopefully this'll be in later."
   print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*2,0,8)
-  s=btns[0].s.." back"
-  print_ol(s,128+64-(#s+1)/2*4,y+menu.start+menu.gap*4,0,8)
+  color(0)
+  rectfill(128+30,y+menu.start-1+menu.gap*4,128+97,y+15+menu.gap*4)
+  print_ol(btns[0].s,128+30,y+menu.start+menu.gap*4,0,8)
+  s="back"
+  print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*4,0,8)
  end
 end
 
@@ -844,17 +851,17 @@ function draw_menu(y)
  sspr(8,0,69,12,64-69/2,y+6)
  
  color(0)
- rectfill(30,y+menu.start-1+menu.gap*menu.opt,97,y+15+menu.gap*(menu.opt))
- print_ol(btns[1].s,97-6,y+menu.start+menu.gap*menu.opt,0,8)
+ rectfill(30,y+menu.start-1+menu.gap*(menu.opt+1),97,y+15+menu.gap*(menu.opt+1))
+ print_ol(btns[1].s,97-6,y+menu.start+menu.gap*(menu.opt+1),0,8)
   
  s="local vs."
- print_ol(s,64-#s/2*4,y+menu.start+menu.gap*1,0,8)
-  
- s="online vs."
  print_ol(s,64-#s/2*4,y+menu.start+menu.gap*2,0,8)
   
- s="instructions"
+ s="online vs."
  print_ol(s,64-#s/2*4,y+menu.start+menu.gap*3,0,8)
+  
+ s="instructions"
+ print_ol(s,64-#s/2*4,y+menu.start+menu.gap*4,0,8)
  
  menu.draw[menu.opt](y)
  
