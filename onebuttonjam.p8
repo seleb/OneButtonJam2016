@@ -615,6 +615,7 @@ function player_update(_p)
    if not _p.dash then
     if not _p.run then
      _p.run = true
+     sfx(0,3)
     end
    else
     _p.run = false
