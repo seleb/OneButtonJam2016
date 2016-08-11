@@ -1,6 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+--one button duel
+--made by sean for #onebuttonjam
 
 function entity(_x,_y,_c)
  local e={}
