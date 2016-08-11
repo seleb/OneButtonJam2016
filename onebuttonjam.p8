@@ -202,7 +202,7 @@ function _init()
  
  -- player 1
  p1=entity(-256,0,7)
- p1.btn=1
+ p1.btn=nil
  p1.dir=1
  p1.id=1
  p1.draw=function(_c)
@@ -241,7 +241,6 @@ function _init()
   {2.5,2.5},
   {-2.5,2.5}
  }
- p1.face=clone(btns[p1.btn].face)
  
  p1.lleg=vectorize(entity(-2,0.1))
  p1.lleg.points={
@@ -300,7 +299,6 @@ function _init()
  
  p1.add(p1.body)
  p1.body.add(p1.head)
- p1.head.add(p1.face)
  
  p1.body.add(p1.lleg)
  p1.lleg.add(p1.lshin)
@@ -317,16 +315,10 @@ function _init()
  -- player 2
  p2=entity(-p1.p[1],p1.p[2])
  p2.s = {-p1.s[1],p1.s[2]}
- p2.btn=0
+ p2.btn=nil
  p2.draw=p1.draw
  p2.dir=-1
  p2.id=2
- 
- p2.face=clone(btns[p2.btn].face)
- -- flip p2's face
- for p in all(p2.face.points) do
-  p[1]*=-1
- end
  
  --duplicate p1's parts to p2
  p2.body=clone(p1.body)
@@ -343,7 +335,6 @@ function _init()
  
  p2.add(p2.body)
  p2.body.add(p2.head)
- p2.head.add(p2.face)
  p2.body.add(p2.rarm)
  p2.body.add(p2.larm)
  p2.body.add(p2.rleg)
@@ -360,7 +351,130 @@ function _init()
  
  reset()
  
+ menu={}
+ menu.step=1
+ menu.step_i=1
+ menu.opt=1
+ menu.start=10
+ menu.gap=6
  
+ menu.select={}
+ menu.u=function()
+  menu.step_i=lerp(menu.step_i,menu.step,0.25)
+  if menu.step==1 then
+   if btnp(2) then
+    menu.opt-=1
+   end
+   if btnp(3) then
+    menu.opt+=1
+   end
+   menu.opt=(menu.opt-1)%3+1
+   
+   if btnp(1) then
+    menu.step+=1
+   end
+  end
+  
+  if menu.step==2 then
+   menu.select[menu.opt]()
+  end
+ end
+ 
+ menu.select[3]=function()
+  if btnp(0) then
+   menu.step-=1
+  end
+ end
+ menu.select[1]=function()
+  local p=nil
+  if p1.face == nil then
+   p=p1
+  elseif p2.face==nil then
+   p=p2
+  elseif onreset==nil then
+   onreset=function()
+    menu=nil
+   end
+   reset()
+   transition=0
+  end
+  
+  -- pick characters
+  if p!=nil and menu.step_i > 1.5 and btnp() != 0 then
+   for i=0,5 do
+    if btnp(i) then
+     if not (p==p2 and i==p1.btn) then
+     p.btn=i
+     p.face=clone(btns[p.btn].face)
+     p.head.add(p.face)
+     if p.btn==4 then
+      p.face.add(btns[4].face.child)
+     end
+     if p==p2 then
+     -- flip p2's face
+      for p in all(p2.face.points) do
+      p[1]*=-1
+      end
+     end
+     break
+    end
+    end
+   end
+  end
+  
+ end
+ menu.select[2]=function()
+  if btnp(0) then
+   menu.step-=1
+  end
+ end
+ menu.draw={}
+ menu.draw[3]=function(y)
+  local s="instructions"
+  print_ol(s,128+64-#s/2*4,y+6,0,8)
+  
+  s="1. select a button"
+  print_ol(s,156,y+menu.start+menu.gap*1,0,8)
+  s="2. hold to run"
+  print_ol(s,156,y+menu.start+menu.gap*2,0,8)
+  s="3. release to attack"
+  print_ol(s,156,y+menu.start+menu.gap*3,0,8)
+  s=btns[0].s.." back"
+  print_ol(s,128+64-(#s+1)/2*4,y+menu.start+menu.gap*4,0,8)
+ end
+ menu.draw[1]=function(y)
+  
+  local s="local vs."
+  print_ol(s,128+64-#s/2*4,y+6,0,8)
+  
+  if p1.btn == nil then
+   s="p1: select"
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2: wait..."
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  elseif p2.btn == nil then
+   s="p1:   "..btns[p1.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2: select"
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  else
+   s="p1:   "..btns[p1.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2:   "..btns[p2.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  end
+  
+ end
+ menu.draw[2]=function(y)
+  local s="online vs."
+  print_ol(s,128+64-#s/2*4,y+6,0,8)
+  s="\150\140\150"
+  print_ol(s,128+64-#s*4,y+menu.start+menu.gap*1,0,8)
+  s="hopefully this'll be in later."
+  print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*2,0,8)
+  s=btns[0].s.." back"
+  print_ol(s,128+64-(#s+1)/2*4,y+menu.start+menu.gap*4,0,8)
+ end
 end
 
 function clone(_p)
@@ -372,6 +486,10 @@ end
 function _update()
  player_update(p1)
  player_update(p2)
+ 
+ if menu != nil then
+  menu.u()
+ end
  
  for p in all(parts) do
   p.life-=1
@@ -421,6 +539,10 @@ function _update()
  -- transition into game
  if paused then
   transition += 0.015
+  if transition > 0.5 and onreset != nil then
+   onreset()
+   onreset=nil
+  end
   if transition >= 1 then
    paused=false
    transition=0
@@ -432,7 +554,6 @@ function _update()
  width=abs(p1.p[1]-p2.p[1])
  s=mid(0.01,64/width,5.5)
  ratio=mid(0,32/width,1)
- 
  
  if gameover then
   -- adjust cameras
@@ -480,8 +601,8 @@ p1.b=0
 end
 
 function player_update(_p)
- if not gameover then
-  if btn(_p.btn) then
+ if not gameover and not paused and menu==nil then
+  if _p.btn != nil and btn(_p.btn) then
    if not _p.dash then
     if not _p.run then
      _p.run = true
@@ -627,25 +748,29 @@ function _draw()
  
  local y=min(flr(124*ratio)+1,flr(126*ratio))
  clip(2,y+2,124,124-y)
- o=entity(-(center)*s+64,110)
- if p1.dash and p1.b > 0 then
-  o.p[1]+=rnd(p1.b*4)-rnd(p1.b*4)
-  o.p[2]+=rnd(p1.b*4)-rnd(p1.b*4)
- end
- if p2.dash and p2.b > 0 then
-  o.p[1]+=rnd(p2.b*4)-rnd(p2.b*4)
-  o.p[2]+=rnd(p2.b*4)-rnd(p2.b*4)
- end
- o.s={s,s}
- cam.push(o)
- floor.draw()
- p1.draw(p1)
- p2.draw(p2)
- draw_fx()
- cam.pop()
  
+ if menu then
+  draw_menu(y)
+ else
+  o=entity(-(center)*s+64,110)
+  if p1.dash and p1.b > 0 then
+   o.p[1]+=rnd(p1.b*4)-rnd(p1.b*4)
+   o.p[2]+=rnd(p1.b*4)-rnd(p1.b*4)
+  end
+  if p2.dash and p2.b > 0 then
+   o.p[1]+=rnd(p2.b*4)-rnd(p2.b*4)
+   o.p[2]+=rnd(p2.b*4)-rnd(p2.b*4)
+  end
+  o.s={s,s}
+  cam.push(o)
+  floor.draw()
+  p1.draw(p1)
+  p2.draw(p2)
+  draw_fx()
+  cam.pop()
+ end
  draw_transition()
- 
+ color(0)
  rect(2,y+2,125,125)
  
  
@@ -654,7 +779,8 @@ function _draw()
  
  --print_ol(transition.."\n"..time().."\n"..gameover_t,32,32,0,7)
  
- draw_ui()
+ 
+ --draw_ui()
 end
 
 function draw_fx()
@@ -668,6 +794,29 @@ function draw_fx()
   color(flash)
   rectfill(0,0,127,127)
  end
+end
+
+function draw_menu(y)
+ camera((menu.step_i-1)*128,0)
+ local s="one button duel"
+ print_ol(s,64-#s/2*4,y+6,0,8)
+  
+ color(0)
+ rectfill(30,y+menu.start-1+menu.gap*menu.opt,97,y+15+menu.gap*(menu.opt))
+ print_ol(btns[1].s,97-6,y+menu.start+menu.gap*menu.opt,0,8)
+  
+ s="local vs."
+ print_ol(s,64-#s/2*4,y+menu.start+menu.gap*1,0,8)
+  
+ s="online vs."
+ print_ol(s,64-#s/2*4,y+menu.start+menu.gap*2,0,8)
+  
+ s="instructions"
+ print_ol(s,64-#s/2*4,y+menu.start+menu.gap*3,0,8)
+ 
+ menu.draw[menu.opt](y)
+ 
+ camera(0,0)
 end
 
 function draw_ui()
