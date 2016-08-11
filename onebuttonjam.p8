@@ -683,7 +683,7 @@ function player_update(_p)
  _p.lleg.a=lerp(_p.lleg.a,(sin(t+0.5)/4+0.08)*_p.b+0.02,0.5)
  _p.lshin.a=lerp(_p.lshin.a,(sin(t+0.3)/8-0.06)*_p.b-0.04,0.5)
  
- _p.rarm.a=lerp(_p.rarm.a,(sin(t+0.5)/8+0.08)*_p.b+0.1,0.5)
+ _p.rarm.a=lerp(_p.rarm.a,(sin(t+0.5)/8+0.08)*_p.b+0.15,0.5)
  _p.relb.a=lerp(_p.relb.a,(sin(t+0.3)/8-0.08)*_p.b-0.05,0.5)
  
  _p.larm.a=lerp(_p.larm.a,(-sin(t)/14+0.08)*_p.b-0.2,0.5)
@@ -693,6 +693,7 @@ function player_update(_p)
  _p.a=lerp(_p.a,abs(sin(t))/20*_p.b,0.5)
  _p.head.a=lerp(_p.head.a,abs(sin(t))/20*_p.b-0.025,0.5)
  _p.body.p[2]=lerp(_p.body.p[2],-4.5-abs(sin(t))*5*_p.b,0.5)
+ _p.head.p[2]=lerp(_p.head.p[2],-9-sin(t-0.25)/3,0.5)
  end
  
  
