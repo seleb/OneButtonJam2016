@@ -401,7 +401,7 @@ function _update()
    gameover_t=time()
    
    if p1.dash or p2.dash then
-    flash=7
+    flash=15
    end
    
    if p1.dash and not p2.dash then
