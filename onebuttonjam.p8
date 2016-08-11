@@ -492,10 +492,9 @@ function _update()
  end
  
  for p in all(parts) do
-  p.life-=1
   --p.p=v_add(p.p,p.v)
-  p.v=v_mul(p.v,{0.9,0.9})
-  if p.life < 0 then
+  p.v=v_mul(p.v,{0.85,0.85})
+  if abs(p.v[1])+abs(p.v[2]) < 0.5 then
    del(parts,p)
   end
  end
@@ -658,7 +657,6 @@ function player_update(_p)
  if _p.b > 0.5 then
   local p={}
   p.c=0
-  p.life=10+rnd(10)
   p.p=v_add(_p.p,{-_p.dir*5+rnd(5)-rnd(5),-rnd(15)-2.5})
   p.v={_p.dir*(0.2+rnd(_p.b*10)),rnd()/5-0.1}
   add(parts,p)
