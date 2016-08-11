@@ -357,21 +357,10 @@ function _init()
  
  
  score={0,0}
- p1.b=0
- p1.bt=0
- p2.b=0
- p2.bt=0
  
- p1.run=false
- p2.run=false
- p1.dash=false
- p2.dash=false
+ reset()
  
- transition = 0.5
- paused=true
  
- gameover=false
- gameover_t=0
 end
 
 function clone(_p)
@@ -431,7 +420,7 @@ function _update()
  
  -- transition into game
  if paused then
-  transition += 0.01
+  transition += 0.015
   if transition >= 1 then
    paused=false
    transition=0
@@ -451,9 +440,9 @@ function _update()
   
   -- transition out of game
   if time()-gameover_t-4 > 0 then
-   transition+=0.01
+   transition+=0.015
    if transition >= 0.5 then
-    run()
+    reset()
    end
   end
  end
@@ -463,6 +452,31 @@ function _update()
  end
  
  
+end
+
+function reset()
+p1.b=0
+ p1.bt=0
+ p2.b=0
+ p2.bt=0
+ 
+ p1.run=false
+ p2.run=false
+ p1.dash=false
+ p2.dash=false
+
+ p1.p[1]=-256
+ p2.p[1]=-p1.p[1]
+ 
+ p1.dead=false
+ p2.dead=false
+  
+ transition = 0.5
+ paused=true
+ 
+ 
+ gameover=false
+ gameover_t=0
 end
 
 function player_update(_p)
