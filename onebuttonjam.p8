@@ -398,19 +398,7 @@ function _init()
    for i=0,5 do
     if btnp(i) then
      if not (p==p2 and i==p1.btn) then
-      sfx(0,3)
-      p.btn=i
-      p.face=clone(btns[p.btn].face)
-      p.head.add(p.face)
-      if p.btn==4 then
-       p.face.add(btns[4].face.child)
-      end
-      if p==p2 then
-      -- flip p2's face
-       for p in all(p2.face.points) do
-       p[1]*=-1
-       end
-      end
+      set_player(p,i)
       break
      end
     end
@@ -478,6 +466,23 @@ function _init()
   s="back"
   print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*4,0,8)
  end
+end
+
+function set_player(p,i)
+ sfx(0,3)
+ p.btn=i
+ p.face=clone(btns[p.btn].face)
+ p.head.add(p.face)
+ if p.btn==4 then
+  p.face.add(btns[4].face.child)
+ end
+ if p==p2 then
+  -- flip p2's face
+  for p in all(p2.face.points) do
+   p[1]*=-1
+  end
+ end
+ 
 end
 
 function clone(_p)
