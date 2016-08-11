@@ -487,7 +487,9 @@ end
 
 function clone(_p)
  local e=vectorize(entity(_p.p[1],_p.p[2],_p.c))
- e.points=_p.points
+ for p in all(_p.points) do
+  add(e.points,{p[1],p[2]})
+ end
  return e
 end
 
