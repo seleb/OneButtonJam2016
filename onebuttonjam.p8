@@ -347,8 +347,6 @@ function _init()
  
  
  
- score={0,0}
- 
  reset()
  
  menu={}
@@ -398,6 +396,7 @@ function _init()
   elseif onreset==nil then
    onreset=function()
     menu=nil
+    score={0,0}
    end
    reset()
    transition=0
@@ -512,7 +511,6 @@ function _update()
   if p1.p[1] > p2.p[1] then
    gameover=true
    gameover_t=time()
-   
    if p1.dash or p2.dash then
     flash=15
     sfx(2,3)
@@ -584,7 +582,15 @@ function _update()
 end
 
 function reset()
-p1.b=0
+ if p1.dead != p2.dead then
+  if p1.dead then
+   score[2]+=1
+  else
+   score[1]+=1
+  end
+ end
+
+ p1.b=0
  p1.bt=0
  p2.b=0
  p2.bt=0
@@ -734,6 +740,19 @@ function _draw()
   p1.draw(p1)
   draw_fx()
   cam.pop()
+  
+  if score!=nil then
+   local s=""
+   if score[1] > 9 then
+   s=""..score[1]
+   else
+   s="0"..score[1]
+   end
+   s=btns[p1.btn].s..":"..s
+   print_ol(s,3,3,0,8)
+  end
+ 
+ 
   draw_transition()
   rect(2,2,62,y)
   
@@ -749,6 +768,18 @@ function _draw()
   p2.draw(p2)
   draw_fx()
   cam.pop()
+  
+  if score!=nil then
+   local s=""
+   if score[2] > 9 then
+   s=""..score[2]
+   else
+   s="0"..score[2]
+   end
+   s=btns[p2.btn].s..":"..s
+   print_ol(s,126-(#s+1)*4,3,0,8)
+  end
+  
   draw_transition()
   rect(65,2,125,y)
  end
@@ -783,11 +814,6 @@ function _draw()
  
  clip(0,0,128,128)
  camera(0,0)
- 
- --print_ol(transition.."\n"..time().."\n"..gameover_t,32,32,0,7)
- 
- 
- --draw_ui()
 end
 
 function draw_fx()
@@ -832,28 +858,6 @@ function draw_menu(y)
  menu.draw[menu.opt](y)
  
  camera(0,0)
-end
-
-function draw_ui()
- camera(0,0)
- 
- 
- local s=""
- if score[1] > 9 then
-  s=""..score[1]
- else
-  s="0"..score[1]
- end
- s=btns[p1.btn].s..":"..s
- print_ol(s,2,2,0,8)
- 
- if score[2] > 9 then
-  s=""..score[2]
- else
-  s="0"..score[2]
- end
- s=btns[p2.btn].s..":"..s
- print_ol(s,127-#s*4-4,2,0,8)
 end
 
 function draw_transition()
