@@ -161,8 +161,8 @@ function _init()
  }
  for p in all(btns[0].face.points) do
   add(btns[1].face.points,rotate(p,0.5))
-  add(btns[2].face.points,rotate(p,0.25))
-  add(btns[3].face.points,rotate(p,0.75))
+  add(btns[2].face.points,rotate(p,0.75))
+  add(btns[3].face.points,rotate(p,0.25))
  end
  
  btns[4].face.points={
