@@ -492,6 +492,8 @@ function clone(_p)
 end
 
 function _update()
+ p1.press=btn(p1.btn)
+  p2.press=btn(p2.btn)
  player_update(p1)
  player_update(p2)
  
@@ -597,6 +599,9 @@ function reset()
  p2.b=0
  p2.bt=0
  
+ p1.press=false
+ p2.press=false
+ 
  p1.run=false
  p2.run=false
  p1.dash=false
@@ -618,7 +623,7 @@ end
 
 function player_update(_p)
  if not gameover and not paused and menu==nil then
-  if _p.btn != nil and btn(_p.btn) then
+  if _p.btn != nil and _p.press then
    if not _p.dash then
     if not _p.run then
      _p.run = true
