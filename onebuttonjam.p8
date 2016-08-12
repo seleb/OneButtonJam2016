@@ -88,6 +88,8 @@ function _init()
  pins.p2_btn=2
  pins.p1_stat=3
  pins.p2_stat=4
+ pins.p1_winner=5
+ pins.p2_winner=6
  
  connection={}
  connection.offline=0
@@ -105,6 +107,8 @@ function _init()
  wpin(pins.p2_btn,6)
  wpin(pins.p1_stat,0)
  wpin(pins.p2_stat,0)
+ wpin(pins.p1_winner,3)
+ wpin(pins.p2_winner,3)
  
  -- camera
  cam=entity(0,0)
@@ -668,6 +672,45 @@ function _update()
  ratio=mid(0,32/width,1)
  
  if gameover then
+  
+  
+  if online and not online_over then
+   local w1
+   local w2
+  
+   if winner==nil then
+    w1 = 0
+   elseif winner==p1 then
+    w1 = 1
+   else
+    w1 = 2
+   end
+   wpin(pins.p1_winner,w1)
+   
+   if rpin(pins.p2_winner) > 2 then
+    --don't know who won yet
+    gameover_t=time()
+   else
+    online_over=true
+    w2=rpin(pins.p2_winner)
+    --check if we agree on who won
+    --if not, call it a draw
+    --during draws, we kill both players
+    --event if we only think one died
+    if not(w1==1 and w2==2) and
+       not(w1==2 and w1==2) then
+     if p1.dead or p2.dead then
+      p1.dead=true
+      p2.dead=true
+     else
+      p1.dead=false
+      p2.dead=false
+     end
+    end
+   end
+  end
+  
+  
   -- adjust cameras
   ratio=mid(0,1,gameover_t+3-time())
   
@@ -728,9 +771,12 @@ function reset()
  transition = 0.5
  paused=true
  
+ wpin(pins.p1_winner,3)
+ wpin(pins.p2_winner,3)
  
  gameover=false
  gameover_t=0
+ online_over=false
 end
 
 function player_update(_p)

@@ -6,7 +6,9 @@ var Pins=Object.freeze({
 	P1_BTN:1,
 	P2_BTN:2,
 	P1_STAT:3,
-	P2_STAT:4
+	P2_STAT:4,
+	P1_WINNER:5,
+	P2_WINNER:6
 });
 
 var Connection=Object.freeze({
@@ -16,25 +18,17 @@ var Connection=Object.freeze({
 	DISABLED:3
 });
 
+connection.vars["P2_BTN"] = 6;
+connection.vars["P2_STAT"] = 0;
+connection.vars["P2_WINNER"] = 3;
+
 var p1_curStat=0;
-var p2_curStat=0;
 var p1_btn=6;
-var p2_btn=6;
+var p1_curWinner=3;
 
 var btn_sent=false;
 
-
-
-connection.handler["id"]=function(_val){
-	connection.p2_id=_val;
-};
-connection.handler["P2_BTN"]=function(_val){
-	p2_btn = _val;
-};
-connection.handler["P2_STAT"]=function(_val){
-	p2_curStat = _val;
-};
-
+var online_disabled=true;
 
 connection.log=function(_msg){
 	document.getElementById("log").innerHTML+="<div>"+_msg+"</div>";
@@ -59,8 +53,8 @@ function poll(){
 				if(!btn_sent && p1_btn != 6){
 					btn_sent=true;
 					connection.send("P2_BTN",pico8_gpio[Pins.P1_BTN]);
-				}if(p2_btn != 6){
-					pico8_gpio[Pins.P2_BTN] = p2_btn;
+				}if(connection.vars["P2_BTN"] < 6){
+					pico8_gpio[Pins.P2_BTN] = connection.vars["P2_BTN"];
 					pico8_gpio[Pins.ONLINE] = Connection.ONLINE;
 				}
 			}
@@ -76,10 +70,20 @@ function poll(){
 			connection.send("P2_STAT",p1_curStat);
 		}
 
+		var p1_winner = pico8_gpio[Pins.P1_WINNER];
+		if(p1_curWinner != p1_winner){
+			p1_curWinner = p1_winner;
+			connection.send("P2_WINNER",p1_curWinner);
+		}
+
 		//p2_curStat = Math.round(Math.random());
-		pico8_gpio[Pins.P2_STAT] = p2_curStat;
+		pico8_gpio[Pins.P2_STAT] = connection.vars["P2_STAT"];
+		pico8_gpio[Pins.P2_WINNER] = connection.vars["P2_WINNER"];
 	}else{
 		// not playing online
+		if(connection.conn != null && connection.conn.peer != null){
+			document.getElementById("p2_id").value = connection.conn.peer;
+		}
 	}
 
 	window.requestAnimationFrame(poll);
@@ -92,14 +96,22 @@ function poll(){
 
 
 document.getElementById("enable_online").addEventListener("click", function(){
-	if(pico8_gpio[Pins.ONLINE] == Connection.DISABLED){
-		pico8_gpio[Pins.ONLINE] = Connection.OFFLINE;
+	if(online_disabled){
+		online_disabled=false;
+
+		connection.onconnect=function(){
+			pico8_gpio[Pins.ONLINE] = Connection.OFFLINE;
+			connection.log("Connected to "+connection.conn.peer);
+			document.getElementById("register").disabled=true;
+			document.getElementById("connect").disabled=true;
+		};
 
 		document.getElementById("enable_online").style.display="none";
 		document.getElementById("online_stuff").style.display="inline-block";
 		document.getElementById("main").style.height="728px";
 
 		document.getElementById("register").addEventListener("click", function(){
+			document.getElementById("register").disabled=true;
 			connection.register(document.getElementById("p1_id").value);
 			
 			connection.peer.on("open", function(_id){
@@ -114,10 +126,16 @@ document.getElementById("enable_online").addEventListener("click", function(){
 				connection.error(_err + " (type: "+_err.type+")");
 			});
 
+			// if we lose
+			connection.peer.on("disconnected",function(){
+				connection.log("Disconnected from server.");
+				document.getElementById("connect").disabled=true;
+				document.getElementById("register").disabled=false;
+			});
 		});
 
 		document.getElementById("connect").addEventListener("click",function(){
-			if(connection.peer != null){
+			if(connection.peer != null && !connection.peer.disconnected){
 				var id=document.getElementById("p2_id").value;
 				if(id != null && id != connection.p1_id){
 					connection.connect(id);
@@ -126,6 +144,11 @@ document.getElementById("enable_online").addEventListener("click", function(){
 				}
 			}else{
 				connection.error("Error: No server connection detected. (type: runtime)");
+				if(connection.peer != null && connection.peer.disconnected){
+					connection.peer.reconnect();
+					connection.log("Reconnecting...");
+					document.getElementById("register").disabled=true;
+				}
 			}
 		});
 

@@ -3,7 +3,7 @@ var connection={
 	p1_id:null,
 	p2_id:null,
 	conn:null,
-	handler:[],
+	vars:[],
 
 	register:function(_id){
 		this.p1_id = _id.toString();
@@ -13,12 +13,12 @@ var connection={
 			port:443,
 			secure:true,
 			path:"/",
-			debug:2
+			debug:0
 		});
 
 		this.peer.on("connection", function(_conn){
 			this.conn = _conn;
-			this.onconnect();
+			this._onconnect();
 		}.bind(this));
 	},
 
@@ -28,7 +28,9 @@ var connection={
 			this.log("Connecting to "+_id+"...");
 			this.p2_id = _id;
 			this.conn = this.peer.connect(this.p2_id);
-			this.onconnect();
+			this.conn.on("open", function(){
+				this._onconnect();
+			}.bind(this));
 		}else{
 			this.error("Error: Invalid opponent ID.");
 		}
@@ -46,13 +48,14 @@ var connection={
 	},
 
 	onconnect:function(){
-		this.conn.on("open", function(){
-			this.send("id",this.p1_id);
-		}.bind(this));
+		// overwrite this
+	},
+	_onconnect:function(){
+		this.onconnect();
 		this.conn.on("data", function(data){
 			var json=JSON.parse(data);
-			this.log("received: " + data);
-			this.handler[json.var](json.val);
+			console.log("received: " + data);
+			this.vars[json.var] = json.val;
 		}.bind(this));
 	}
 };
