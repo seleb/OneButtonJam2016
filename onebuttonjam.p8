@@ -884,7 +884,7 @@ end
 
 
 function _draw()
- local ratio=1-remap(ratio,0,1,0.33,1)
+ local ratio=1-remap(ratio,0,1,0.38,1)
  
  --cls()
  clip(0,0,128,128)
