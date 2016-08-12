@@ -1,0 +1,206 @@
+﻿
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>One Button Duel PICO-8 Cartridge</title>
+		<meta name="description" content="">
+
+		<style type="text/css">
+		<!--
+		@font-face {
+			font-family:'04B_03__';
+			src:url('04B_03__.ttf');
+			font-weight:normal;
+			font-style:normal;
+			}
+		html,body{
+			padding:0;
+			margin:0;
+			width:100%;
+			height:100%;
+			background:transparent;
+			font-family:"04B_03__", sans-serif;
+		}
+		button{
+			font-family:"04B_03__", sans-serif;
+			margin:0;
+			padding:0;
+			padding-top:4px;
+			padding-bottom:4px;
+			cursor:pointer;
+			outline: none;
+			border:solid #000 4px; background-color:transparent; box-sizing:content-box;
+		}
+		center{
+			text-align:center;
+			width:512px;
+			height:574px;
+			position:absolute;
+			display:block;
+			top:0;
+			bottom:0;
+			right:0;
+			left:0;
+			margin:auto;
+		}
+		canvas#canvas{
+			width: 512px;
+			height: 512px;
+
+			image-rendering: -moz-crisp-edges;
+			image-rendering:   -o-crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: crisp-edges;
+			-ms-interpolation-mode: nearest-neighbor;
+			image-rendering: pixelated;
+		}
+
+		.pico8_el{
+			width:110px;
+			height:16px;
+			display:inline-block; 
+			margin: 4px;
+			margin-top:0;
+			margin-bottom:0;
+			border:solid black 4px;
+			padding-top: 4px;
+			padding-bottom: 4px;
+			text-align: center;
+			color:#000;
+			background-color:none;
+			cursor: pointer;
+
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+		.pico8_el img{
+			image-rendering: -moz-crisp-edges;
+			image-rendering:   -o-crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: crisp-edges;
+			-ms-interpolation-mode: nearest-neighbor;
+			image-rendering: pixelated;
+		}
+
+		.pico8_el a{
+			text-decoration: none;
+			color:#000;
+		}
+
+		.pico8_el:hover,
+		.pico8_el:link,
+		button:hover{
+			background-color:rgb(126, 37, 83);
+		}
+
+
+		hr{
+			width:488px;height:16px;background:#7e2553;
+			border:none;
+			padding:0;
+			margin:0;
+			margin-top:12px;
+			margin-bottom:12px;
+		}
+		hr:before,
+		hr:after{
+			content:'';
+			display: block;
+			position:relative;
+			width:488px;height:4px;background:#7e2553;
+		}
+		hr:before{
+			top:-8px;
+		}
+		hr:after{
+			bottom:-16px;
+		}
+				-->
+		</style>
+	</head>
+
+	<body style="background:rgb(255, 204, 170)">
+
+		<center id="main">
+			<button id="enable_online" style="width:488px;">Enable Online</button>
+			<div id="online_stuff" style="display:none; margin-top:8px; width:488px; border:solid #000 4px;">
+				<label>My ID: <input id="p1_id" type="text"/></label>
+				<button id="register" role="button">register</button><br>
+				<label>Opponent ID: <input id="p2_id" type="text"/></label>
+				<button id="connect" role="button" disabled>connect</button><br>
+				<hr/>
+				<div id="log" style="width:100%; height:64px; overflow-y:auto;"></div>
+			</div>
+
+			<div style="width:512px;">
+				<!-- CANVAS -->
+				<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+				<!-- SCRIPTS -->
+				<script type="text/javascript" src="vendor/peer.js"></script>
+				<script type="text/javascript" src="connect.js"></script>
+
+				<script type="text/javascript">
+					var require = null; // fix for node.js issue (prevents game from running when opened in something like NW.js)
+
+					// if using NW.js, let ESC exit fullscreen (no way to get out of it otherwise)
+					if (typeof nw !== 'undefined' && nw !== null) {
+						nw.App.registerGlobalHotKey(new nw.Shortcut({
+							key: "Escape",
+							active: function() {
+								nw.Window.get().leaveFullscreen();
+							}
+						}));
+					}
+
+					var canvas = document.getElementById("canvas");
+					canvas.width = window.innerWidth;
+					canvas.height = window.innerHeight;
+
+					// show Emscripten environment where the canvas is
+					// arguments are passed to PICO-8
+					
+					var Module = {
+						arguments: ["-width","512","-height","512"],
+					};
+					Module.canvas = canvas;
+
+	                // When pico8_buttons is defined, PICO-8 takes each int to be a live bitfield
+	                // representing the state of each player's buttons
+	               
+	                var pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0]; // max 8 players
+	                //pico8_buttons[1] = 2 | 16; // example: player 0, RIGHT and Z held down
+	               
+	                // when pico8_gpio is defined, reading and writing to gpio pins will
+	                // read and write to these values
+	                var pico8_gpio = new Array(128);
+					
+				</script>
+				
+				<script type="text/javascript" src="main.js"></script>
+
+				<script async type="text/javascript" src="onebuttonduel.js"></script>
+				<script>
+					// key blocker. prevent cursor keys from scrolling page while playing cart.
+					function onKeyDown_blocker(event) {
+						event = event || window.event;
+						var o = document.activeElement;
+						if(!o || o == document.body || o.tagName == "canvas"){
+							if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1){
+								if(event.preventDefault){
+									event.preventDefault();
+								}
+							}
+						}
+					}
+
+					document.addEventListener('keydown', onKeyDown_blocker, false);
+				</script>
+				<!-- BUTTONS -->
+				<div class=pico8_el onclick="Module.pico8Reset();"><img src="data:image/gif;base64,R0lGODlhGAAYAIAAAP///wICAiH5BAEAAAAALAAAAAAYABgAAAJFhI+py+0XYnhNTrosznJHpEGX8omlcZojEKKdCr5u2rKyTd/1fjN86tP1ODkgcWUxzoS1WBOXjCqh0qSj+iRhp5uuF1AAADs=" alt="Reset" width=12 height=12/> Reset</div><div class=pico8_el onclick="Module.requestFullScreen(true, false);"><img src="data:image/gif;base64,R0lGODlhGAAYAIAAAP///wICAiH5BAEAAAAALAAAAAAYABgAAAI/hI+py30Bo5y02judk7pxQHVfqI1RZ5gQCp5tGoju+pbuFtcfDsO0TNvZgjdPpvUzqnIshLCJxEinVCb02ikAADs=" alt="Fullscreen" width=12 height=12/> Fullscreen</div><div class=pico8_el onclick="Module.pico8ToggleSound();"><img src="data:image/gif;base64,R0lGODlhGAAYAIAAAP///wICAiH5BAEAAAAALAAAAAAYABgAAAI9hI+py+0XYnhNTpqi0Rhx3oGASInkYimnKrFlm11OGr/nGt9yBXs7Q/N1NjscsPjDfJIv4jDHVPae1CqiAAA7" alt="Toggle Sound" width=12 height=12/> Sound</div><div class=pico8_el ><a target="_new" href="http://www.lexaloffle.com/bbs/?cat=7&sub=2" style="width:100%; display:inline-block;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAlElEQVR4Ae2dMQ5FQBCGh6jcwAkkateg3DiAa+iQUGqVKi95FQfAJRQOoHeBUf8JyQqKjZ1uMzuz2e/LTE3KhyF7kSlgLOykas23f6D+A9Yp84aAOYU15pcJnfji0Il2ID8HzC4y38ZrnfIBGxeRoR3c3EWrACdsV5BOsx7OSRnrOXh4F5HzA6bevwUn8wlz7eCDsQM99B3ks0s/4QAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII=" alt="Carts" width=12 height=12/> Carts</a></div>			</div>
+		</center>
+	</body>
+</html>

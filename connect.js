@@ -1,0 +1,58 @@
+var connection={
+	peer:null,
+	p1_id:null,
+	p2_id:null,
+	conn:null,
+	handler:[],
+
+	register:function(_id){
+		this.p1_id = _id.toString();
+		this.log("Registering "+_id+"...");
+		this.peer = new Peer(this.p1_id, {
+			host: "obd-connection-broker.herokuapp.com",
+			port:443,
+			secure:true,
+			path:"/",
+			debug:2
+		});
+
+		this.peer.on("connection", function(_conn){
+			this.conn = _conn;
+			this.onconnect();
+		}.bind(this));
+	},
+
+	connect:function(_id){
+		_id = (_id || "").toString().trim();
+		if(_id.length > 0){
+			this.log("Connecting to "+_id+"...");
+			this.p2_id = _id;
+			this.conn = this.peer.connect(this.p2_id);
+			this.onconnect();
+		}else{
+			this.error("Error: Invalid opponent ID.");
+		}
+	},
+
+	send:function(_var, _val){
+		this.conn.send('{"var":"'+_var+'","val":"'+_val+'"}');
+	},
+
+	log:function(_msg){
+		console.log(_msg);
+	},
+	error:function(_msg){
+		console.error(_msg);
+	},
+
+	onconnect:function(){
+		this.conn.on("open", function(){
+			this.send("id",this.p1_id);
+		}.bind(this));
+		this.conn.on("data", function(data){
+			var json=JSON.parse(data);
+			this.log("received: " + data);
+			this.handler[json.var](json.val);
+		}.bind(this));
+	}
+};

@@ -4,6 +4,15 @@ __lua__
 --one button duel
 --made by sean for #onebuttonjam
 
+
+function rpin(i)
+ return peek(0x5f80+i)
+end
+
+function wpin(i,v)
+ return poke(0x5f80+i,v)
+end
+
 function entity(_x,_y,_c)
  local e={}
  e.p={}
@@ -72,6 +81,30 @@ end
 
 function _init()
  music(2,1600,1+2+3)
+ 
+ pins={}
+ pins.online=0
+ pins.p1_btn=1
+ pins.p2_btn=2
+ pins.p1_stat=3
+ pins.p2_stat=4
+ 
+ connection={}
+ connection.offline=0
+ connection.connecting=1
+ connection.online=2
+ connection.disabled=3
+ 
+ online=false
+ 
+ -- start with online disabled
+ -- btns invalid
+ -- and not moving
+ wpin(pins.online,connection.disabled)
+ wpin(pins.p1_btn,6)
+ wpin(pins.p2_btn,6)
+ wpin(pins.p1_stat,0)
+ wpin(pins.p2_stat,0)
  
  -- camera
  cam=entity(0,0)
@@ -353,10 +386,12 @@ function _init()
   if menu.step==1 then
    if btnp(2) then
     menu.opt-=1
+    if menu.opt==2 and rpin(pins.online) == connection.disabled then menu.opt -=1 end
     sfx(0,3)
    end
    if btnp(3) then
     menu.opt+=1
+    if menu.opt==2 and rpin(pins.online) == connection.disabled then menu.opt +=1 end
     sfx(0,3)
    end
    menu.opt=(menu.opt-1)%3+1
@@ -385,12 +420,7 @@ function _init()
   elseif p2.face==nil then
    p=p2
   elseif onreset==nil then
-   onreset=function()
-    menu=nil
-    score={0,0}
-   end
-   reset()
-   transition=0
+   start()
   end
   
   -- pick characters
@@ -407,11 +437,39 @@ function _init()
   
  end
  menu.select[2]=function()
-  if btnp(0) then
-   menu.step-=1
-   sfx(1,3)
+  online=true
+  
+  local p=nil
+  if p1.face == nil then
+   p=p1
+  elseif p2.face==nil then
+   p=p2
+  elseif onreset==nil then
+   start()
   end
+  
+  -- pick characters
+  if p==p1 and menu.step_i > 1.5 and btnp() != 0 then
+   for i=0,5 do
+    if btnp(i) then
+     set_player(p,i)
+     wpin(pins.online,connection.connecting)
+     break
+    end
+   end
+  elseif p==p2 then
+   
+   local i = rpin(pins.p2_btn)
+   if i<6 then
+    set_player(p2,i)
+   end
+  end
+  
+  
  end
+ 
+ 
+ 
  menu.draw={}
  menu.draw[3]=function(y)
   local s="instructions"
@@ -456,15 +514,24 @@ function _init()
  menu.draw[2]=function(y)
   local s="online vs."
   print_ol(s,128+64-#s/2*4,y+6,0,8)
-  s="\150\140\150"
-  print_ol(s,128+64-#s*4,y+menu.start+menu.gap*1,0,8)
-  s="hopefully this'll be in later."
-  print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*2,0,8)
-  color(0)
-  rectfill(128+30,y+menu.start-1+menu.gap*4,128+97,y+15+menu.gap*4)
-  print_ol(btns[0].s,128+30,y+menu.start+menu.gap*4,0,8)
-  s="back"
-  print_ol(s,128+64-#s/2*4,y+menu.start+menu.gap*4,0,8)
+  
+  if p1.btn == nil then
+   s="p1: select"
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2: wait..."
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  elseif p2.btn == nil then
+   s="p1:   "..btns[p1.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2: connecting..."
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  else
+   s="p1:   "..btns[p1.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*1,0,8)
+   s="p2:   "..btns[p2.btn].s
+   print_ol(s,158,y+menu.start+menu.gap*2,0,8)
+  end
+  
  end
 end
 
@@ -483,6 +550,11 @@ function set_player(p,i)
   end
  end
  
+ if p == p1 then
+  wpin(pins.p1_btn,i)
+ else
+  wpin(pins.p2_btn,i)
+ end
 end
 
 function clone(_p)
@@ -495,7 +567,24 @@ end
 
 function _update()
  p1.press=btn(p1.btn)
+ if p1.press then
+  wpin(pins.p1_stat,1)
+ else
+  wpin(pins.p1_stat,0)
+ end
+ if online then 
+  p2.press=rpin(pins.p2_stat)!=0
+ else
   p2.press=btn(p2.btn)
+  if p2.press then
+   wpin(pins.p2_stat,1)
+  else
+   wpin(pins.p2_stat,0)
+  end
+ end
+ 
+ 
+ 
  player_update(p1)
  player_update(p2)
  
@@ -585,6 +674,15 @@ function _update()
  end
  
  
+end
+
+function start()
+ onreset=function()
+  menu=nil
+  score={0,0}
+ end
+ reset()
+ transition=0
 end
 
 function reset()
@@ -881,7 +979,11 @@ function draw_menu(y)
  print_ol(s,64-#s/2*4,y+menu.start+menu.gap*2,0,8)
   
  s="online vs."
- print_ol(s,64-#s/2*4,y+menu.start+menu.gap*3,0,8)
+ local c=8
+ if rpin(pins.online) == connection.disabled then
+  c=5
+ end
+ print_ol(s,64-#s/2*4,y+menu.start+menu.gap*3,0,c)
   
  s="instructions"
  print_ol(s,64-#s/2*4,y+menu.start+menu.gap*4,0,8)
