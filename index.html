@@ -119,6 +119,18 @@
 		hr:after{
 			bottom:-16px;
 		}
+
+		input{
+			font-family:'04b03Regular', sans-serif;
+			margin:0;
+			padding:0;
+			padding-top:4px;
+			padding-bottom:4px;
+			outline: none;
+			border:solid #000 4px; background-color:transparent; box-sizing:content-box;
+			font-size:1em;
+			margin-right: 4px;
+		}
 				-->
 		</style>
 	</head>
@@ -128,12 +140,12 @@
 		<center id="main">
 			<button id="enable_online" style="width:488px;">Enable Online</button>
 			<div id="online_stuff" style="display:none; margin-top:8px; width:488px; border:solid #000 4px;">
-				<label>My ID: <input id="p1_id" type="text"/></label>
-				<button id="register" role="button">register</button><br>
-				<label>Opponent ID: <input id="p2_id" type="text"/></label>
-				<button id="connect" role="button" disabled>connect</button><br>
+				<label><span style="display:inline-block;width:150px; text-align:right;">My ID:&nbsp;</span><input style="width:200px;" id="p1_id" type="text"/></label><button style="width:110px;margin-top:4px;" id="register" role="button">register</button><br>
+				<label><span style="display:inline-block;width:150px; text-align:right;">Opponent ID:&nbsp;</span><input style="width:200px;" id="p2_id" type="text"/></label><button style="width:110px;margin-top:4px;" id="connect" role="button" disabled>connect</button><br>
 				<hr/>
-				<div id="log" style="width:100%; height:64px; overflow-y:auto;"></div>
+				<div id="log" style="width:100%; height:64px; overflow-y:auto;">
+					<div>Enter an ID, register, and connect to your opponent's ID to play online</div>
+				</div>
 			</div>
 
 			<div style="width:512px;">
