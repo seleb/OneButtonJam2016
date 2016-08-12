@@ -633,6 +633,20 @@ function _update()
    else
     winner=nil
    end
+   
+   
+   -- force dash for misses
+   if not p1.dash then
+    p1.dash=true
+    p1.b*=3
+    p1.dasht=time()+p1.b/2
+   end
+   
+   if not p2.dash then  
+    p2.dash=true
+    p2.b*=3
+    p2.dasht=time()+p2.b/2
+   end
   end
  end
  
