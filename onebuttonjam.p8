@@ -81,7 +81,7 @@ end
 
 function _init()
  music(2,1600,1+2+3)
- 
+
  pins={}
  pins.online=0
  pins.p1_btn=1
@@ -985,21 +985,25 @@ end
 function draw_floor()
  local p1=cam.point({-500,-2})
  local p2=cam.point({500,80})
- r=cam.s[2]*60
+ local r=cam.s[2]
  if gameover then
   r*=ratio
  end
+ 
+ local c=center*cam.s[1]
  if r > 0 then
   color(8)
-  circ(center*cam.s[1],p1[2],r+2)
-  circfill(center*cam.s[1],p1[2],r)
+  circ(c,p1[2],60*r)
+  circfill(c,p1[2],60*r-2)
  end
+ 
  color(2)
  rectfill(p1[1],p1[2],p2[1],p2[2])
  color(15)
  line(p1[1],p1[2]+1,p2[1],p1[2]+1)
  line(p1[1],p2[2]-1,p2[1],p2[2]-1)
  line(p1[1],p2[2]-3,p2[1],p2[2]-3)
+ 
 end
 
 function draw_fx()
