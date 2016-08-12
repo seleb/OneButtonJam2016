@@ -606,10 +606,8 @@ function _update()
   if p1.p[1] > p2.p[1] then
    gameover=true
    gameover_t=time()
-   if p1.dash or p2.dash then
-    flash=15
-    sfx(2,3)
-   end
+   flash=15
+   sfx(2,3)
    
    if p1.dash and not p2.dash then
     winner=p1
