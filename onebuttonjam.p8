@@ -121,7 +121,6 @@ function _init()
  options.palette=dget(4)
  options.palette=(options.palette-1)%#options.palettes+1
  
- 
  options.set_palette=function()
   for i=1,4 do
    pal(options.palettes[1][i],options.palettes[options.palette][i])
@@ -1078,6 +1077,16 @@ function _draw()
    else
    s="0"..score[1]
    end
+   if gameover then
+    s=s.."\n"
+    if p1.dead==p2.dead then
+     s=s.."tie!"
+    elseif p1.dead then
+     s=s.."loss!"
+    else
+     s=s.."win!"
+    end
+   end
    s=btns[p1.btn].s..":"..s
    print_ol(s,3,3,0,8)
   end
@@ -1106,8 +1115,18 @@ function _draw()
    else
    s="0"..score[2]
    end
+   if gameover then
+    s=s.."\n"
+    if p2.dead==p1.dead then
+     s=s.." tie!"
+    elseif p2.dead then
+     s=s.."loss!"
+    else
+     s=s.." win!"
+    end
+   end
    s=btns[p2.btn].s..":"..s
-   print_ol(s,126-(#s+1)*4,3,0,8)
+   print_ol(s,126-20,3,0,8)
   end
   
   draw_transition()
