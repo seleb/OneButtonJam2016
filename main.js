@@ -108,7 +108,7 @@ document.getElementById("enable_online").addEventListener("click", function(){
 
 		document.getElementById("enable_online").style.display="none";
 		document.getElementById("online_stuff").style.display="inline-block";
-		document.getElementById("main").style.height="728px";
+		document.getElementById("main").style.height="736px";
 
 		document.getElementById("register").addEventListener("click", function(){
 			document.getElementById("register").disabled=true;
