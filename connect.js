@@ -9,7 +9,7 @@ var connection={
 		this.p1_id = _id.toString();
 		this.log("Registering "+_id+"...");
 		this.peer = new Peer(this.p1_id, {
-			host: "obd-connection-broker.herokuapp.com",
+			host: "obd-connection-broker.glitch.me",
 			port:443,
 			secure:true,
 			path:"/",
